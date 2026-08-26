@@ -1,18 +1,36 @@
 package com.example.bookstore.controller;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
+import java.util.List;
 
-@Controller
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.bookstore.model.Book;
+import com.example.bookstore.repository.BookRepository;
+import com.example.bookstore.utils.BookNotFoundException;
+
+@RestController
+@RequestMapping("/api/books")
 public class BookController {
-	@Value("${spring.application.name}")
-	String appName;
+	@Autowired
+	private BookRepository bookRepository;
 	
-	@RequestMapping("/")
-	public String homePage(Model model) {
-		model.addAttribute("appName", appName);
-		return "home";
+	@GetMapping
+	public Iterable<Book> findAll() {
+		return bookRepository.findAll();
+	}
+	
+	@GetMapping("/title/{bookTitle}")
+	public List<Book> findByTitle(@PathVariable String bookTitle) {
+		return bookRepository.findByTitle(bookTitle);
+	}
+	
+	@GetMapping("/{id}")
+	public Book findOne(@PathVariable Long id) {
+		return bookRepository.findById(id)
+				.orElseThrow(() -> new BookNotFoundException("Book not found"));
 	}
 }
